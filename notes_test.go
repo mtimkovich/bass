@@ -15,6 +15,7 @@ var noteTests = []struct {
 	{"a12", "A"},
 	{"E3", "G"},
 	{"e4", "Ab"},
+	{"e", "error"},
 }
 
 func TestParse(t *testing.T) {
@@ -22,7 +23,10 @@ func TestParse(t *testing.T) {
 		t.Run(tt.in, func(t *testing.T) {
 			note, fret, err := parse(tt.in)
 			if err != nil {
-				t.Errorf("%v: parse error", tt.in)
+				if tt.out != "error" {
+					t.Errorf("%v: parse error", tt.in)
+				}
+				return
 			}
 			output := half_step_plus(note, fret)
 			if output != tt.out {
