@@ -1,7 +1,10 @@
 package main
 
 import (
-	"strings"
+	"errors"
+	"regexp"
+	"strconv"
+	"unicode"
 )
 
 var note_to_int = map[string]int{
@@ -43,9 +46,35 @@ const OCTAVE = 12
 
 // Add half steps to a note and return the resulting note.
 func half_step_plus(start string, n int) string {
-	start = strings.ToUpper(start)
 	tone := note_to_int[start] + n
 	return int_to_note[tone%OCTAVE]
+}
+
+func capitalizeFirst(str string) string {
+	if len(str) == 0 {
+		return str
+	}
+
+	runes := []rune(str)
+	runes[0] = unicode.ToUpper(runes[0])
+	return string(runes)
+}
+
+func parse(s string) (string, int, error) {
+	var (
+		note string
+		fret int
+	)
+	re := regexp.MustCompile(`^\s*([A-Ga-g](b|#)?)\s*([0-9]+)\s*$`)
+	matches := re.FindStringSubmatch(s)
+
+	if len(matches) == 0 {
+		return note, fret, errors.New("Invalid input")
+	}
+
+	note = capitalizeFirst(matches[1])
+	fret, _ = strconv.Atoi(matches[3])
+	return note, fret, nil
 }
 
 // func main() {

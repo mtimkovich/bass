@@ -1,11 +1,8 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
-	"regexp"
-	"strconv"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -39,23 +36,6 @@ func initialModel() model {
 
 func (m model) Init() tea.Cmd {
 	return textinput.Blink
-}
-
-func parse(s string) (string, int, error) {
-	var (
-		note string
-		fret int
-	)
-	re := regexp.MustCompile(`^\s*([A-Ga-g](b|#)?)\s*([0-9]+)\s*$`)
-	matches := re.FindStringSubmatch(s)
-
-	if len(matches) == 0 {
-		return note, fret, errors.New("Invalid input")
-	}
-
-	note = matches[1]
-	fret, _ = strconv.Atoi(matches[3])
-	return note, fret, nil
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
