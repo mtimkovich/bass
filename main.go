@@ -23,7 +23,6 @@ type model struct {
 
 func initialModel() model {
 	var input = textinput.New()
-	input.Placeholder = "String and fret e.g. A5 or e9"
 	input.Focus()
 	input.CharLimit = 5
 
@@ -38,6 +37,14 @@ func (m model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
+func updateResult(in string) string {
+	if notes, fret, err := parse(in); err == nil {
+		return half_step_plus(notes, fret)
+	}
+
+	return ""
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -50,18 +57,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.input, cmd = m.input.Update(msg)
-
-	if notes, fret, err := parse(m.input.Value()); err == nil {
-		m.result = half_step_plus(notes, fret)
-	} else {
-		m.result = ""
-	}
+	m.result = updateResult(m.input.Value())
 
 	return m, cmd
 }
 
 func (m model) View() string {
-	return fmt.Sprintf("%s\n%s",
+	return fmt.Sprintf(
+		"String and fret (e.g. A5 or e9)\n%s\n%s",
 		m.input.View(),
 		m.result)
 }
