@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 	"unicode"
@@ -77,16 +78,16 @@ func parse(s string) (string, int, error) {
 	return note, fret, nil
 }
 
-// func main() {
-// 	strings := []string{"E", "A", "D", "G"}
-// 	// dots := []int{0, 3, 5, 7, 9, 12, 15, 17, 19, 21}
-// 	dots := []int{0, 3, 5, 7, 9}
+func draw_neck() {
+	strings := []string{"E", "A", "D", "G"}
+	// dots := []int{0, 3, 5, 7, 9, 12, 15, 17, 19, 21}
+	dots := []int{0, 3, 5, 7, 9}
 
-// 	for _, dot := range dots {
-// 		fmt.Printf("%v: ", dot)
-// 		for _, s := range strings {
-// 			fmt.Printf("% 2v ", half_step_plus(s, dot))
-// 		}
-// 		fmt.Println()
-// 	}
-// }
+	for _, dot := range dots {
+		fmt.Printf("%v: ", dot)
+		for _, s := range strings {
+			fmt.Printf("% 2v ", half_step_plus(s, dot))
+		}
+		fmt.Println()
+	}
+}

@@ -106,6 +106,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.historyUp()
 		case tea.KeyDown:
 			m.historyDown()
+		case tea.KeyLeft:
+			m.input.Reset()
 		}
 	}
 
