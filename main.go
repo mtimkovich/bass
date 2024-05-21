@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"slices"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -58,10 +57,8 @@ func updateResult(in string) string {
 
 func (m *model) historyPush() {
 	in := m.input.Value()
-	if !slices.Contains(m.history, in) {
-		m.history = append(m.history, in)
-		m.historyIter = 0
-	}
+	m.history = append(m.history, in)
+	m.historyIter = 0
 
 	if len(m.history) > 50 {
 		_, m.history = m.history[0], m.history[1:]
