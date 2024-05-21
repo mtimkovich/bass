@@ -127,6 +127,5 @@ func (m model) View() string {
 	return fmt.Sprintf(
 		"E A D B [0-21]\n%v\n%v",
 		m.input.View(),
-		// m.result)
-		m.history)
+		m.result)
 }
