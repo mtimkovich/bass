@@ -1,4 +1,4 @@
-module timkovi.ch/bass
+module timkovi.ch/fret
 
 go 1.22.3
 

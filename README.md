@@ -1,3 +1,3 @@
-# bass
+# Fret
 
-TUI for getting note name from string and fret on bass or guitar.
+TUI for getting note names from string and fret on bass or g*itar.
