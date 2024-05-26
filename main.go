@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/gammazero/deque"
 )
 
 func main() {
@@ -27,7 +28,7 @@ type model struct {
 	input       textinput.Model
 	result      string
 	fresh       bool
-	history     []string
+	history     *deque.Deque[string]
 	historyIter int
 }
 
@@ -40,9 +41,8 @@ func initialModel() model {
 		input:  input,
 		result: "",
 		fresh:  false,
-		// TODO: History should be own struct with double-ended queue.
-		// AND TESTS.
-		history:     []string{},
+		// TODO: Write tests for history.
+		history:     deque.New[string](),
 		historyIter: -1,
 	}
 
@@ -63,54 +63,58 @@ func updateResult(in string) string {
 // Return if we inserted.
 func (m *model) historyPush() bool {
 	in := m.input.Value()
-	if len(m.history) > 0 {
-		last := m.history[len(m.history)-1]
-		if in == last {
+	if m.history.Len() > 0 {
+		if in == m.history.Back() {
 			return false
 		}
 	}
-	m.history = append(m.history, in)
+	m.history.PushBack(in)
 	m.historyIter = 0
 
-	if len(m.history) > 50 {
-		_, m.history = m.history[0], m.history[1:]
+	if m.history.Len() > 50 {
+		m.history.PopFront()
 	}
 
 	return true
 }
 
 func (m *model) historyPop() {
-	if len(m.history) == 0 {
+	if m.history.Len() == 0 {
 		return
 	}
 
-	m.history = m.history[:len(m.history)-1]
+	m.history.PopBack()
 }
 
 func (m *model) historyDown() {
 	m.historyIter -= 1
 	if m.historyIter <= -1 {
-		m.input.SetValue("")
+		m.input.Reset()
 		m.historyIter = -1
 		return
 	}
 
-	index := len(m.history) - m.historyIter - 1
-	m.input.SetValue(m.history[index])
+	m.setInput()
 }
 
 func (m *model) historyUp() {
-	if len(m.history) == 0 {
+	if m.history.Len() == 0 {
 		return
 	}
 
 	m.historyIter += 1
-	if m.historyIter >= len(m.history) {
-		m.historyIter = len(m.history) - 1
+	if m.historyIter >= m.history.Len() {
+		m.historyIter = m.history.Len() - 1
 	}
 
-	index := len(m.history) - m.historyIter - 1
-	m.input.SetValue(m.history[index])
+	m.setInput()
+}
+
+// Set textinput based on the historyIter.
+func (m *model) setInput() {
+	index := m.history.Len() - m.historyIter - 1
+	m.input.SetValue(m.history.At(index))
+	m.input.CursorEnd()
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
