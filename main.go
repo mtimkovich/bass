@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -25,6 +26,7 @@ func main() {
 type model struct {
 	input       textinput.Model
 	result      string
+	fresh       bool
 	history     []string
 	historyIter int
 }
@@ -35,8 +37,11 @@ func initialModel() model {
 	input.CharLimit = 5
 
 	return model{
-		input:       input,
-		result:      "",
+		input:  input,
+		result: "",
+		fresh:  false,
+		// TODO: History should be own struct with double-ended queue.
+		// AND TESTS.
 		history:     []string{},
 		historyIter: -1,
 	}
@@ -55,12 +60,13 @@ func updateResult(in string) string {
 	return ""
 }
 
-func (m *model) historyPush() {
+// Return if we inserted.
+func (m *model) historyPush() bool {
 	in := m.input.Value()
 	if len(m.history) > 0 {
 		last := m.history[len(m.history)-1]
 		if in == last {
-			return
+			return false
 		}
 	}
 	m.history = append(m.history, in)
@@ -69,6 +75,16 @@ func (m *model) historyPush() {
 	if len(m.history) > 50 {
 		_, m.history = m.history[0], m.history[1:]
 	}
+
+	return true
+}
+
+func (m *model) historyPop() {
+	if len(m.history) == 0 {
+		return
+	}
+
+	m.history = m.history[:len(m.history)-1]
 }
 
 func (m *model) historyDown() {
@@ -115,13 +131,24 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	old := m.input.Value()
+	old_result := updateResult(old)
+
 	m.input, cmd = m.input.Update(msg)
-	m.result = updateResult(m.input.Value())
+
+	in := m.input.Value()
+	m.result = updateResult(in)
+
+	if in == "" {
+		m.fresh = false
+	}
 
 	if m.result == "" {
 		m.historyIter = -1
-	} else if m.input.Value() != old {
-		m.historyPush()
+	} else if in != old {
+		if m.fresh && old_result != "" && strings.HasPrefix(in, old) {
+			m.historyPop()
+		}
+		m.fresh = m.historyPush()
 	}
 
 	return m, cmd
