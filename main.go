@@ -25,11 +25,10 @@ func main() {
 }
 
 type model struct {
-	input       textinput.Model
-	result      string
-	fresh       bool
-	history     *deque.Deque[string]
-	historyIter int
+	input   textinput.Model
+	result  string
+	fresh   bool
+	history History
 }
 
 func initialModel() model {
@@ -41,9 +40,10 @@ func initialModel() model {
 		input:  input,
 		result: "",
 		fresh:  false,
-		// TODO: Write tests for history.
-		history:     deque.New[string](),
-		historyIter: -1,
+		history: History{
+			queue: deque.New[string](),
+			iter:  -1,
+		},
 	}
 
 }
@@ -60,60 +60,9 @@ func updateResult(in string) string {
 	return ""
 }
 
-// Return if we inserted.
-func (m *model) historyPush() bool {
-	in := m.input.Value()
-	if m.history.Len() > 0 {
-		if in == m.history.Back() {
-			return false
-		}
-	}
-	m.history.PushBack(in)
-	m.historyIter = 0
-
-	if m.history.Len() > 50 {
-		m.history.PopFront()
-	}
-
-	return true
-}
-
-func (m *model) historyPop() {
-	if m.history.Len() == 0 {
-		return
-	}
-
-	m.history.PopBack()
-}
-
-func (m *model) historyDown() {
-	m.historyIter -= 1
-	if m.historyIter <= -1 {
-		m.input.Reset()
-		m.historyIter = -1
-		return
-	}
-
-	m.setInput()
-}
-
-func (m *model) historyUp() {
-	if m.history.Len() == 0 {
-		return
-	}
-
-	m.historyIter += 1
-	if m.historyIter >= m.history.Len() {
-		m.historyIter = m.history.Len() - 1
-	}
-
-	m.setInput()
-}
-
-// Set textinput based on the historyIter.
+// Set textinput based on the history iter.
 func (m *model) setInput() {
-	index := m.history.Len() - m.historyIter - 1
-	m.input.SetValue(m.history.At(index))
+	m.input.SetValue(m.history.Entry())
 	m.input.CursorEnd()
 }
 
@@ -131,12 +80,12 @@ func (m *model) UpdateInput(msg tea.Msg) {
 	}
 
 	if m.result == "" {
-		m.historyIter = -1
+		m.history.iter = -1
 	} else if in != old {
 		if m.fresh && old_result != "" && strings.HasPrefix(in, old) {
-			m.historyPop()
+			m.history.Pop()
 		}
-		m.fresh = m.historyPush()
+		m.fresh = m.history.Push(in)
 	}
 }
 
@@ -149,9 +98,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyCtrlC:
 			return m, tea.Quit
 		case tea.KeyUp:
-			m.historyUp()
+			m.history.Up()
+			m.setInput()
 		case tea.KeyDown:
-			m.historyDown()
+			m.history.Down()
+			m.setInput()
 		case tea.KeyLeft:
 			m.input.Reset()
 		}
