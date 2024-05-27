@@ -117,6 +117,29 @@ func (m *model) setInput() {
 	m.input.CursorEnd()
 }
 
+func (m *model) UpdateInput(msg tea.Msg) {
+	old := m.input.Value()
+	old_result := updateResult(old)
+
+	m.input, _ = m.input.Update(msg)
+
+	in := m.input.Value()
+	m.result = updateResult(in)
+
+	if in == "" {
+		m.fresh = false
+	}
+
+	if m.result == "" {
+		m.historyIter = -1
+	} else if in != old {
+		if m.fresh && old_result != "" && strings.HasPrefix(in, old) {
+			m.historyPop()
+		}
+		m.fresh = m.historyPush()
+	}
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -134,26 +157,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	old := m.input.Value()
-	old_result := updateResult(old)
-
-	m.input, cmd = m.input.Update(msg)
-
-	in := m.input.Value()
-	m.result = updateResult(in)
-
-	if in == "" {
-		m.fresh = false
-	}
-
-	if m.result == "" {
-		m.historyIter = -1
-	} else if in != old {
-		if m.fresh && old_result != "" && strings.HasPrefix(in, old) {
-			m.historyPop()
-		}
-		m.fresh = m.historyPush()
-	}
+	m.UpdateInput(msg)
 
 	return m, cmd
 }
