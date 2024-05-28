@@ -78,7 +78,7 @@ func parse(s string) (string, int, error) {
 	return note, fret, nil
 }
 
-func draw_neck() {
+func drawNeck() {
 	strings := []string{"E", "A", "D", "G"}
 	// dots := []int{0, 3, 5, 7, 9, 12, 15, 17, 19, 21}
 	dots := []int{0, 3, 5, 7, 9}
@@ -91,3 +91,7 @@ func draw_neck() {
 		fmt.Println()
 	}
 }
+
+// func main() {
+// 	drawNeck()
+// }

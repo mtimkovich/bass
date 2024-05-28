@@ -115,7 +115,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	return fmt.Sprintf(
-		"E A D B [0-21]\n%v\n%v",
+		"E A D G [0-21]\n%v\n%v",
 		m.input.View(),
 		m.result)
 }
