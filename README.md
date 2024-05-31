@@ -1,12 +1,14 @@
-# Fret
+# :guitar: Fret
 
 ![Preview](/preview.webp)
 
-TUI for getting note names from string and fret on bass or guitar. I created this to bridge the gap between reading tabs and sheet music.
+TUI for getting note names from string and fret on bass or guitar. I created this to help myself bridge the gap between reading tabs and learning sheet music.
 
 ## Features
-- Fast
-- History
+
+- Autocomplete note names
+- Scrollable input history
 
 ## Author
+
 Max Timkovich
