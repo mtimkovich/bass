@@ -27,7 +27,7 @@ func main() {
 type model struct {
 	input   textinput.Model
 	result  string
-	fresh   bool
+	active  bool
 	history History
 }
 
@@ -39,7 +39,7 @@ func initialModel() model {
 	return model{
 		input:  input,
 		result: "",
-		fresh:  false,
+		active: false,
 		history: History{
 			queue: deque.New[string](),
 			iter:  -1,
@@ -62,6 +62,7 @@ func updateResult(in string) string {
 
 // Set textinput based on the history iter.
 func (m *model) setInput() {
+	m.active = false
 	m.input.SetValue(m.history.Entry())
 	m.input.CursorEnd()
 }
@@ -76,16 +77,16 @@ func (m *model) UpdateInput(msg tea.Msg) {
 	m.result = updateResult(in)
 
 	if in == "" {
-		m.fresh = false
+		m.active = false
 	}
 
 	if m.result == "" {
 		m.history.iter = -1
 	} else if in != old {
-		if m.fresh && old_result != "" && strings.HasPrefix(in, old) {
+		if m.active && old_result != "" && strings.HasPrefix(in, old) {
 			m.history.Pop()
 		}
-		m.fresh = m.history.Push(in)
+		m.active = m.history.Push(in)
 	}
 }
 
